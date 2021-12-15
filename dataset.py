@@ -12,6 +12,9 @@ import numpy as np
 import os
 import argparse
 
+import requests
+import tqdm
+
 ### Wide Residual Networks: 4 pixels are reflection padded on each side, and
 ### a 32 × 32 crop is randomly sampled from the padded image or its horizontal flip
 
@@ -50,7 +53,7 @@ def load_cifar(batch_size):
 
     return trainloader, testloader
 
-'''
+
 ##### test #####
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -77,6 +80,19 @@ if __name__ == "__main__":
 
     classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+    
+    url = "https://openaipublic.blob.core.windows.net/image-gpt/color-clusters/kmeans_centers.npy"
+    filename = url.split("/")[-1]
+
+    r = requests.get(url, stream=True)
+    with open(f"{filename}", "wb") as f:
+        file_size = int(r.headers["content-length"])
+        chunk_size = 1000
+        with tqdm(ncols=80, desc="Fetching " + filename, total=file_size, unit_scale=True) as pbar:
+            # 1k for chunk_size, since Ethernet packet size is around 1500 bytes
+            for chunk in r.iter_content(chunk_size=chunk_size):
+                f.write(chunk)
+                pbar.update(chunk_size)
 
     dataiter = iter(trainloader)
     images, labels = dataiter.next()
@@ -84,4 +100,4 @@ if __name__ == "__main__":
     print(images.shape) # b,c,h,w
 
     imshow(torchvision.utils.make_grid(images))
-'''
+
