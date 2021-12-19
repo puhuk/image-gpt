@@ -33,8 +33,13 @@ def load_cifar(batch_size):
     
     trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
                                             download=True,transform=transform)
+    ##### USE 20% of data for test
+    indices = np.arange(len(trainset)*0.2)
+    trainset = Subset(trainset, indices)
+
+    train_sampler = torch.utils.data.distributed.DistributedSampler(trainset)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                            shuffle=True, num_workers=2)
+                                            shuffle=False, num_workers=2, pin_memory=True, sampler=train_sampler)
 
     testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                         download=True,transform=transform)
