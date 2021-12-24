@@ -131,12 +131,13 @@ class ImageGPT(pl.LightningModule):
         loss = self.criterion(logits.view(-1, logits.size(-1)), y.view(-1))
 
         logs = {"loss": loss}
+        self.log("train_loss", loss)
         return {"loss": loss, "log": logs}
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
 
-        print(x.shape, y.shape)
+        # print(x.shape, y.shape)
 
         logits, loss = self.gpt(x, y)
         loss = self.criterion(logits.view(-1, logits.size(-1)), y.view(-1))
@@ -148,6 +149,7 @@ class ImageGPT(pl.LightningModule):
         if self.classify or self.hparams.classify:
             correct = torch.cat([x["correct"] for x in outs])
             logs["val_acc"] = correct.sum().float() / correct.shape[0]
+        self.log("val_loss", avg_loss)
         return {"val_loss": avg_loss, "log": logs}
 
     def test_step(self, batch, batch_idx):
