@@ -2,6 +2,12 @@
 
 ## Hot to use
 
+### Installation
+
+```bash
+pip install -r requirements.txt
+```
+
 ### Training
 
 ```bash
